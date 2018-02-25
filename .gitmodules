@@ -1,0 +1,3 @@
+[submodule "gym_torcs"]
+	path = gym_torcs
+	url = git@github.com:michalslonina/gym_torcs.git
