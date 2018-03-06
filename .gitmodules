@@ -1,3 +1,6 @@
 [submodule "gym_torcs"]
 	path = gym_torcs
 	url = git@github.com:michalslonina/gym_torcs.git
+[submodule "keras-rl"]
+	path = keras-rl
+	url = git@github.com:matthiasplappert/keras-rl.git

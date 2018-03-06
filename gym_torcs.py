@@ -8,7 +8,7 @@ import copy
 import collections as col
 import os
 import time
-
+import pdb
 
 class TorcsEnv:
     terminal_judge_start = 100  # If after 100 timestep still no progress, terminated
@@ -60,7 +60,6 @@ class TorcsEnv:
             self.observation_space = spaces.Box(low=low, high=high)
 
     def step(self, u):
-       #print("Step")
         # convert thisAction to the actual torcs actionstr
         client = self.client
 
@@ -143,18 +142,19 @@ class TorcsEnv:
 
         # Termination judgement #########################
         episode_terminate = False
-        #if (abs(track.any()) > 1 or abs(trackPos) > 1):  # Episode is terminated if the car is out of track
-        #    reward = -200
-        #    episode_terminate = True
-        #    client.R.d['meta'] = True
+ #       if (abs(track.any()) > 1 or abs(trackPos) > 1):  # Episode is terminated if the car is out of track
+ #           reward = -200
+ #           episode_terminate = True
+ #           client.R.d['meta'] = True
 
-        #if self.terminal_judge_start < self.time_step: # Episode terminates if the progress of agent is small
-        #    if progress < self.termination_limit_progress:
-        #        print("No progress")
-        #        episode_terminate = True
-        #        client.R.d['meta'] = True
+#        if self.terminal_judge_start < self.time_step: # Episode terminates if the progress of agent is small
+#            if progress < self.termination_limit_progress:
+#                print("No progress")
+#                episode_terminate = True
+#                client.R.d['meta'] = True
 
-        if np.cos(obs['angle']) < 0: # Episode is terminated if the agent runs backward
+        if np.cos(obs['angle']) < 0.5: # Episode is terminated if the agent runs backward
+            reward = -200
             episode_terminate = True
             client.R.d['meta'] = True
 
@@ -215,14 +215,45 @@ class TorcsEnv:
         time.sleep(0.5)
 
     def agent_to_torcs(self, u):
-        torcs_action = {'steer': u[0]}
+#        pdb.set_trace()
+        steer = 0
+        throttle = 0
 
-        if self.throttle is True:  # throttle action is enabled
-            torcs_action.update({'accel': u[1]})
-            torcs_action.update({'brake': u[2]})
+        if (u==0):
+            steer=-1
+            accel=1
+            brk=0
 
-        if self.gear_change is True: # gear change action is enabled
-            torcs_action.update({'gear': int(u[3])})
+        if (u==1):
+            steer=0
+            accel=0
+            brk=0
+
+        if (u==2):
+            steer=1
+            accel=1
+            brk=0
+
+        if (u==3):
+            steer=0
+            accel=0
+            brk=1
+
+        if (u==4):
+            steer=1
+            accel=0
+            brk=1
+
+
+        torcs_action = {'steer': steer, 'accel': accel, 'brake': brk}
+        print('ACTION:' + str(torcs_action))
+
+ #       if self.throttle is True:  # throttle action is enabled
+ #           torcs_action.update({'accel': u[1]})
+ #           torcs_action.update({'brake': u[2]})
+
+ #       if self.gear_change is True: # gear change action is enabled
+ #           torcs_action.update({'gear': int(u[3])})
 
         return torcs_action
 
@@ -245,7 +276,7 @@ class TorcsEnv:
                      'speedX', 'speedY', 'speedZ', 'angle', 'damage',
                      'opponents',
                      'rpm',
-                     'track', 
+                     'track',
                      'trackPos',
                      'wheelSpinVel']
             Observation = col.namedtuple('Observaion', names)
