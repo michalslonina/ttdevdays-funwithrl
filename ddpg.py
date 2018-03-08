@@ -28,10 +28,8 @@ import argparse
 from ReplayBuffer import ReplayBuffer
 #from ActorNetwork import ActorNetwork
 #from CriticNetwork import CriticNetwork
-from OU import OU
 import timeit
 window_length=4
-OU = OU()       #Ornstein-Uhlenbeck Process
 
 ENV_NAME="torcs"
 
