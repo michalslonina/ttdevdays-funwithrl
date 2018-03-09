@@ -104,11 +104,7 @@ def playGame(train_indicator=0):    #1 means Train, 0 means simply Run
     env = TorcsEnv(vision=vision, throttle=False,gear_change=False)
     nb_actions = 3  # left, nothing , right, break
 
-    # Next, we build a very simple model regardless of the dueling architecture
-    # if you enable dueling network in DQN , DQN will build a dueling network base on your model automatically
-    # Also, you can build a dueling network by yourself and turn off the dueling network in DQN.
     model = Sequential()
-#    model.add(Flatten(input_shape=(1,) + env.observation_space.shape))
     model.add(Flatten(input_shape=(window_length,29)))
     model.add(Dense(64))
     model.add(Activation('relu'))
@@ -119,25 +115,16 @@ def playGame(train_indicator=0):    #1 means Train, 0 means simply Run
     model.add(Dense(nb_actions, activation='linear'))
     print(model.summary())
 
-    # Finally, we configure and compile our agent. You can use every built-in Keras optimizer and
-    # even the metrics!
     memory = SequentialMemory(limit=1000000, window_length=window_length)
     policy = BoltzmannQPolicy(tau=1.)
     processor=MyProcessor()
-    # enable the dueling network
-    # you can specify the dueling_type to one of {'avg','max','naive'}
+
     dqn = DQNAgent(model=model, nb_actions=nb_actions, memory=memory, nb_steps_warmup=100,
                 enable_dueling_network=True, dueling_type='avg',
                 target_model_update=1e-2, policy=policy,
                 processor=processor)
     dqn.compile(RMSprop(lr=1e-3), metrics=['mae'])
-    #dqn.compile(Adam(lr=1e-3), metrics=['mae'])
-
     dqn.load_weights('duel_dqn_{}_weights.h5f'.format(ENV_NAME))
-
-    # Okay, now it's time to learn something! We visualize the training here for show, but this
-    # slows down training quite a lot. You can always safely abort the training prematurely using
-    # Ctrl + C.
     dqn.fit(env, nb_steps=500000, visualize=False, verbose=2)
 
     # After training is done, we save the final weights.
